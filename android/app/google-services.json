@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "388587154944",
+    "project_id": "dvsfsdfsdfds",
+    "storage_bucket": "dvsfsdfsdfds.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:388587154944:android:f7a3f5d6e204499813f2e5",
+        "android_client_info": {
+          "package_name": "com.app.cpm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsyyTGb7z-MkG5XkNP42DL_a3cnkQGmz8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
