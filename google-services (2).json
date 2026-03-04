@@ -41,43 +41,6 @@
           ]
         }
       }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:660088162203:android:83426a5d233315a2f4433e",
-        "android_client_info": {
-          "package_name": "com.cloudrecord.app"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "660088162203-7t59487fq8t2c44jp7fl0i6dptj8hiaq.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.cloudrecord.app",
-            "certificate_hash": "b5aaf29fb4c5ee8cc07a80c51347ad967740c3b5"
-          }
-        },
-        {
-          "client_id": "660088162203-83lsae98trqkr93jmrcen9cga372i4ne.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBrNmri78Eo5mF-vtg8zV6T4dlQkjn5F98"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "660088162203-83lsae98trqkr93jmrcen9cga372i4ne.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
     }
   ],
   "configuration_version": "1"
