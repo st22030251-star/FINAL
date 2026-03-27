@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Esta aplicación requiere acceso a la cámara para tomar fotos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Esta aplicación requiere acceso al micrófono para grabar recordatorios de voz.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Esta aplicación requiere acceso a tu ubicación para guardar dónde se crearon tus notas.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Esta aplicación requiere acceso a la galería para seleccionar y guardar fotos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Esta aplicación requiere permiso para guardar fotos en tu galería.</string>
 </dict>
 </plist>

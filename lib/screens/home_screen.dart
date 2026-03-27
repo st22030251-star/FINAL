@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:gal/gal.dart';
 import 'public_notes_screen.dart';
 import 'notes_screen.dart';
 import 'calendar_screen.dart';
@@ -22,10 +28,20 @@ class _HomeScreenState extends State<HomeScreen> {
   String _deviceId = 'unknown';
   bool _isLoadingId = true;
 
+  late AudioRecorder _audioRecorder;
+  bool _isRecording = false;
+
   @override
   void initState() {
     super.initState();
     _getDeviceId();
+    _audioRecorder = AudioRecorder();
+  }
+
+  @override
+  void dispose() {
+    _audioRecorder.dispose();
+    super.dispose();
   }
 
   Future<void> _getDeviceId() async {
@@ -181,6 +197,113 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _takePhoto() async {
+    final status = await Permission.camera.request();
+    if (status.isGranted) {
+      final picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+      
+      if (photo != null) {
+        // Guardar la foto en el almacenamiento de la aplicación
+        final directory = await getApplicationDocumentsDirectory();
+        final String path = directory.path;
+        final String fileName = 'photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final File localImage = File('$path/$fileName');
+        
+        await File(photo.path).copy(localImage.path);
+        
+        // Guardar también en la galería (Almacenamiento)
+        await Gal.putImage(localImage.path);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Foto guardada en app y galería: ${localImage.path}")),
+          );
+        }
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Permiso de cámara denegado")),
+        );
+      }
+    }
+  }
+
+  Future<void> _recordAudio() async {
+    if (_isRecording) {
+      final path = await _audioRecorder.stop();
+      setState(() => _isRecording = false);
+      if (path != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Audio grabado en: $path")),
+        );
+        // Aquí se podría guardar la nota con el path del audio
+        FirestoreService().addNote("Recordatorio de voz guardado", _currentIndex == 1, _deviceId);
+      }
+    } else {
+      if (await _audioRecorder.hasPermission()) {
+        final directory = await getApplicationDocumentsDirectory();
+        final String path = '${directory.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        
+        await _audioRecorder.start(const RecordConfig(), path: path);
+        setState(() => _isRecording = true);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Permiso de micrófono denegado")),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _getLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Los servicios de ubicación están desactivados")),
+        );
+      }
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Permiso de ubicación denegado")),
+          );
+        }
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Permisos de ubicación permanentemente denegados")),
+        );
+      }
+      return;
+    }
+
+    final Position position = await Geolocator.getCurrentPosition();
+    if (mounted) {
+      final noteContent = "Ubicación actual: Lat: ${position.latitude}, Lon: ${position.longitude}";
+      FirestoreService().addNote(noteContent, _currentIndex == 1, _deviceId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Ubicación guardada: ${position.latitude}, ${position.longitude}")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoadingId) {
@@ -215,6 +338,27 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          FloatingActionButton(
+            onPressed: _getLocation,
+            heroTag: "location",
+            backgroundColor: Colors.purple,
+            child: const Icon(Icons.location_on, color: Colors.white),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            onPressed: _recordAudio,
+            heroTag: "record",
+            backgroundColor: _isRecording ? Colors.red : Colors.pink,
+            child: Icon(_isRecording ? Icons.stop : Icons.mic, color: Colors.white),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            onPressed: _takePhoto,
+            heroTag: "take_photo",
+            backgroundColor: Colors.orange,
+            child: const Icon(Icons.camera_alt, color: Colors.white),
+          ),
+          const SizedBox(height: 16),
           FloatingActionButton(
             onPressed: _addNoteManual,
             heroTag: "add_manual",
